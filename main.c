@@ -1,46 +1,68 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
-#include <string.h>
+#include<string.h>
 
-void aplikacijaZaEvidentiranjeVremena()
+
+void aktiviraj(FILE *fp, char* fname)
 {
-    int pin;
-    printf("Unesite PIN kod:");
-    scanf("%d",&pin);
-    FILE *dat;
-    char osoba[25];
-    char s[6];
-    itoa(pin,osoba,10);
-    strcat(osoba,".txt");
-    if((dat=fopen(osoba,"a")))
-    {
-        time_t t = time(0);
-        struct tm tm = *localtime(&t);
-        while(1)
-        {
-            printf("Dolazak na posao [D], odlazak sa posla [O] ili nazad[N]:");
-            scanf("%s",s);
-            if(strcmp(s,"D")==0)
-            {
-                fprintf(dat,"Vrijeme dolaska na posao: %02d-%02d-%d %02d:%02d:%02d\n",tm.tm_mday, tm.tm_mon + 1,tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
-                printf("Trenutno vrijeme uspjesno upisano u registar za radno vrijeme!");
-                break;
-            }
-            else if(strcmp(s,"O")==0)
-            {
-                fprintf(dat,"Vrijeme odlaska sa posla: %02d-%02d-%d %02d:%02d:%02d\n",tm.tm_mday, tm.tm_mon + 1,tm.tm_year + 1900, tm.tm_hour, tm.tm_min, tm.tm_sec);
-                printf("Trenutno vrijeme uspjesno upisano u registar za radno vrijeme!");
-                break;
-            }
-            else if(strcmp(s,"N")==0)
-                break;
-        }
-    }
-    else printf("Greška pri otvaranju datoteke!");
+   char korisnickoIme[20];
+   char hrLozinka[20];
+           printf("Unesite korisnicko ime: \n");
+           scanf("%s",korisnickoIme);
+           strcpy(hrLozinka,fname);
+          if(fp=fopen(fname,"w"))
+          {
+           fprintf(fp,"%s %s\n",korisnickoIme,hrLozinka);
+          }
+          fclose(fp);
 }
-int main()
+void deaktiviraj(FILE *fp, char *fname)
 {
-    aplikacijaZaEvidentiranjeVremena();
-    return 0;
+    if(!remove(fname))
+            printf("Uspjesna deaktivacija.\n");
+          else
+            printf("Ne postoji zaposleni sa navedenim PIN kodom.\n");
+}
+int main( )
+{
+   char *lozinka="admin123";
+   char unos[20];
+   char b;
+   char fname[20];
+   char korisnickoIme[20];
+   char hrLozinka[20];
+   FILE *fp;
+
+   printf("Unesite lozinku: ");
+   scanf("%s",unos);
+
+   if(!strcmp(lozinka,unos))
+   {
+
+     do
+     {
+      printf("Za aktivaciju unesite 'A', za deaktivaciju 'D',a za izlaz '0'.\n");
+      scanf("\n%c",&b);
+
+      if(b=='A')
+      {
+    printf("Unesite PIN korisnika: \n");
+      scanf("%s",fname);
+      aktiviraj(fp,fname);
+      }
+      else if(b=='D')
+      {
+          printf("Unesite PIN kod korisnika: \n");
+      scanf("%s",fname);
+          deaktiviraj(fp,fname);
+      }
+      else if(b!='0')
+        printf("Nepoznata opcija.\n");
+     }while(b!='0');
+     printf("KRAJ.\n");
+   }
+   else
+    printf("Nemoguc pristup administratorskoj aplikaciji.\n");
+
+   return 0;
 }
