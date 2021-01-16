@@ -42,5 +42,6 @@ void aplikacijaZaEvidentiranjeVremena()
 int main()
 {
     aplikacijaZaEvidentiranjeVremena();
+    printf("Da li imate licencu:");
     return 0;
 }
