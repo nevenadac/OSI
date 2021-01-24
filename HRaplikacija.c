@@ -551,7 +551,9 @@ int main()
     {
         printf("Neispravan alfanumericki kljuc!\n");
         printf("Pristupate HR aplikaciji bez licence! Vase mogucnosti su ogranicene!\n");
-        upotreba_HR_aplikacije("bez licence");
+        if(pristup_HR_aplikaciji()==-1)
+            printf("~~~Pristup HR aplikaciji odbijen! Ponovo pokrenite aplikaciju za novi pokusaj!~~~\n");
+       else upotreba_HR_aplikacije("bez licence");
     }
     return 0;
 }
