@@ -4,10 +4,14 @@
 #include <string.h>
 #include <time.h>
 #define MAX 50
-static int broj_bl;
+
+static int prijaveNaSistem;
+int moguciBrojPrijava;
+
 typedef struct novi_nalog
 {
     char korisnicko_ime[MAX],PIN[MAX];
+    int brojPrijava;
 } NOVI_NALOG;
 typedef struct datum
 {
@@ -49,6 +53,7 @@ void dodaj_u_listu(CVOR **pglava, ZAPOSLENI data)
     *pglava=novi;
 }
 
+
 void brisi_listu(CVOR **pglava)
 {
     while(*pglava)
@@ -58,6 +63,7 @@ void brisi_listu(CVOR **pglava)
         *pglava=p;
     }
 }
+
 void pisi_header_u_fajl(FILE *dat)
 {
     fprintf(dat,
@@ -129,31 +135,75 @@ void pretraga_po_imenu_prezimenu(CVOR** pglava)
         printf("===================================\n");
     }
 }
+
+
+
 int pristup_HR_aplikaciji()
 {
-    int i=4;
-    int j=4;
     int flag1=0, flag2=0;
     FILE *fp;
+    NOVI_NALOG n;
+    NOVI_NALOG niz[MAX];
     char kor_ime[MAX],pin_kod[MAX];
-    char izd[MAX],pind[MAX];
+    char pind[MAX];
+    int i=0;
+    int flag3=0;
+    printf("Moguci broj prijava: %d\n",moguciBrojPrijava);
     if((fp=fopen("HRkorisnickinalozi.txt","r"))!=NULL)
     {
         printf("Unesite korisnicko ime: ");
         scanf("%s",kor_ime);
-        while(fscanf(fp,"%s %s\n", &izd, &pind)!=EOF)
+        while(fscanf(fp,"%s %s %d\n", &n.korisnicko_ime, &n.PIN, &n.brojPrijava)!=EOF)
         {
-            if(strcmp(kor_ime,izd)==0)
+            if(strcmp(n.korisnicko_ime,kor_ime)==0)
             {
                 flag2=1;
-                printf("Unesite lozinku: ");
-                scanf("%s",pin_kod);
-                if(strcmp(pin_kod,pind)==0)
-                    flag1=1;
+                if(n.brojPrijava==moguciBrojPrijava)
+                {
+                    printf("Morate promijeniti lozinku!\nUnesite staru lozinku: ");
+                    scanf("%s",pin_kod);
+                    if(strcmp(pin_kod,n.PIN)==0)
+                    {
+                        flag1=1;
+                        do
+                        {
+                            printf("Unesite novu lozinku: ");
+                            scanf("%s",pind);
+                            if(strcasecmp(pind,n.PIN)==0)
+                            {
+                                printf("Nova lozinka ne moze biti stara lozinka!\n");
+                            }
+                        }
+                        while(strcasecmp(pind,n.PIN)==0);
+                        strcpy(n.PIN,pind);
+                        n.brojPrijava=0;
+                    }
+                }
+                else
+                {
+                    printf("Unesite lozinku: ");
+                    scanf("%s",pin_kod);
+                    if(strcmp(pin_kod,n.PIN)==0)
+                    {
+                        flag1=1;
+                        n.brojPrijava++;
+                    }
+                }
             }
+            strcpy(niz[i].korisnicko_ime,n.korisnicko_ime);
+            strcpy(niz[i].PIN,n.PIN);
+            niz[i].brojPrijava=n.brojPrijava;
+            i++;
         }
         fclose(fp);
     }
+    if((fp=fopen("HRkorisnickinalozi.txt","w"))!=NULL)
+    {
+        for(int k=0; k<i; k++)
+            fprintf(fp,"%s %s %d\n", niz[k].korisnicko_ime,niz[k].PIN,niz[k].brojPrijava);
+        fclose(fp);
+    }
+
     if(flag2==0)
     {
         printf("Neispravno korisnicko ime!!!\n");
@@ -169,13 +219,14 @@ int pristup_HR_aplikaciji()
         printf("PRISTUP HR APLIKACIJI OMOGUCEN!\n");
         return 1;
     }
-
 }
-void dodavanje_novog_zaposlenog(int m)
+
+void dodavanje_novog_zaposlenog(int m, char licenca[])
 {
     FILE *fp1,*fp2;
     char c[MAX];
     ZAPOSLENI n;
+    int broj_bl=m;
     if((fp1=fopen("podaci.txt","a"))!=NULL)
     {
         if((fp2=fopen("korisnickiNalozi.txt","a"))!=NULL)
@@ -184,6 +235,11 @@ void dodavanje_novog_zaposlenog(int m)
             ZAPOSLENI r;
             do
             {
+                if(strcmp("bez licence",licenca)==0 && m==5)
+                {
+                    printf("Dostigli ste limit bez licenciranog dodavanja informacija.\n");
+                    return;
+                }
                 printf("===================================\n");
                 printf("Ime radnika: ");
                 scanf("%s",r.ime);
@@ -230,9 +286,19 @@ void dodavanje_novog_zaposlenog(int m)
                 printf("Korisnicko ime i lozinka zaposlenog %s %s je:%s,%s",r.ime,r.prezime,username,lozinka);
                 printf("\nZaposleni %s,%s je dodat u arhivu!\n",r.prezime, r.ime);
                 printf("===================================\n");
-                fprintf(fp1,"%-15s %-15s %-15s %02d %02d %02d %27s %-15s %-10s %02d %02d %04d - %02d %02d %04d %42s %05d %-14s\n",r.ime,r.prezime,r.mjbor,r.dpu.dan,r.dpu.mjesec,r.dpu.godina,r.rsektr,r.rmj,r.status.status,r.dz.dan,r.dz.mjesec,r.dz.godina, r.status.prekidzpsl.dan,r.status.prekidzpsl.mjesec,r.status.prekidzpsl.godina,r.JMB,r.poc_pl,r.dodatneinfo);
+                fprintf(fp1,"%-15s %-15s %-15s %02d %02d %02d %27s %-15s %-10s %02d %02d %04d - %02d %02d %04d %42s %5d %-14s\n",r.ime,r.prezime,r.mjbor,r.dpu.dan,r.dpu.mjesec,r.dpu.godina,r.rsektr,r.rmj,r.status.status,r.dz.dan,r.dz.mjesec,r.dz.godina, r.status.prekidzpsl.dan,r.status.prekidzpsl.mjesec,r.status.prekidzpsl.godina,r.JMB,r.poc_pl,r.dodatneinfo);
                 printf("Ukoliko zelite da prekinete dodavanje unesite KRAJ, ukoliko zelite da nastavite unesite bilo koje slovo!\n");
                 scanf("%s",c);
+                if(strcmp("bez licence",licenca)==0)
+                {
+                    broj_bl++;
+                    if(broj_bl==5)
+                    {
+                        printf("Dostigli ste limit bez licenciranog dodavanja informacija.\n");
+                        return;
+                    }
+
+                }
             }
             while(strcmp("KRAJ",c)!=0);
             printf("~~~~~~~Dodavanje radnika zavrseno!~~~~~~~");
@@ -311,14 +377,16 @@ void aktivacija_deaktivacija()
                     strcpy(trenutni->info.status.status, "Neaktivan");
                     printf("Unesite datum deaktivacije: ");
                     scanf("%d %d %d",&dat.dan,&dat.mjesec,&dat.godina);
-                    trenutni->info.status.prekidzpsl=dat;
+                    trenutni->info.status.prekidzpsl.dan=dat.dan;
+                    trenutni->info.status.prekidzpsl.mjesec=dat.mjesec;
+                    trenutni->info.status.prekidzpsl.godina=dat.godina;
                     printf("~~~Izvrsena deaktivacija radnika!~~~");
                 }
                 trenutni=trenutni->next;
             }
             if(indikator_pretrage!=1)
                 printf("Neuspjesna pretraga!\n");
-            if((fp=fopen("OSII.txt","w"))!=NULL)
+            if((fp=fopen("podaci.txt","w"))!=NULL)
             {
                 pisi_header_u_fajl(fp);
                 if(glava==0)
@@ -329,7 +397,7 @@ void aktivacija_deaktivacija()
                     while(trenutni!=NULL)
                     {
                         ZAPOSLENI r=trenutni->info;
-                        fprintf(fp,"%-15s %-15s %-15s %02d %02d %02d %27s %-15s %-10s %02d %02d %04d - %02d %02d %04d %42s %05d %-14s\n",r.ime,r.prezime,r.mjbor,r.dpu.dan,r.dpu.mjesec,r.dpu.godina,r.rsektr,r.rmj,r.status.status,r.dz.dan,r.dz.mjesec,r.dz.godina, r.status.prekidzpsl.dan,r.status.prekidzpsl.mjesec,r.status.prekidzpsl.godina,r.JMB,r.poc_pl,r.dodatneinfo);
+                        fprintf(fp,"%-15s %-15s %-15s %02d %02d %02d %27s %-15s %-10s %02d %02d %04d - %02d %02d %04d %42s %5d %-14s\n",r.ime,r.prezime,r.mjbor,r.dpu.dan,r.dpu.mjesec,r.dpu.godina,r.rsektr,r.rmj,r.status.status,r.dz.dan,r.dz.mjesec,r.dz.godina, r.status.prekidzpsl.dan,r.status.prekidzpsl.mjesec,r.status.prekidzpsl.godina,r.JMB,r.poc_pl,r.dodatneinfo);
                         trenutni=trenutni->next;
                     }
                 }
@@ -418,7 +486,7 @@ void pregled_po_rmjestu(CVOR** pglava)
     printf("===================================\n");
 }
 
-void upotreba_HR_aplikacije()
+void upotreba_HR_aplikacije(char licenca[])
 {
     CVOR* glava=NULL;
     int m;
@@ -436,7 +504,7 @@ void upotreba_HR_aplikacije()
     printf("Vas izbor: ");
     scanf("%d",&i);
     if(i==1)
-        dodavanje_novog_zaposlenog(m);
+        dodavanje_novog_zaposlenog(m,licenca);
     else if(i==2)
         pregled_prijave_radnogvr();
     else if(i==3)
@@ -460,7 +528,7 @@ int provjera_licence()
     if((fp=fopen("Config.txt","r"))!=NULL)
     {
         char licenca[MAX],pom[MAX];
-        fscanf(fp,"%s %s", pom, licenca);
+        fscanf(fp,"%s %s %d", pom, licenca,&moguciBrojPrijava);
         if(strcmp(licenca,s)==0)
             return 1;
         else
@@ -469,18 +537,21 @@ int provjera_licence()
 }
 int main()
 {
+    int moguciBrPrijavaNaSistem;
     if((provjera_licence())==1)
     {
         if(pristup_HR_aplikaciji()==-1)
             printf("~~~Pristup HR aplikaciji odbijen! Ponovo pokrenite aplikaciju za novi pokusaj!~~~\n");
         else
-            upotreba_HR_aplikacije();
+        {
+            upotreba_HR_aplikacije("sa licencom");
+        }
     }
     else
     {
         printf("Neispravan alfanumericki kljuc!\n");
         printf("Pristupate HR aplikaciji bez licence! Vase mogucnosti su ogranicene!\n");
-        upotreba_HR_aplikacije();
+        upotreba_HR_aplikacije("bez licence");
     }
     return 0;
 }
