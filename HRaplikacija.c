@@ -7,6 +7,7 @@
 
 static int prijaveNaSistem;
 int moguciBrojPrijava;
+//int m;
 
 typedef struct novi_nalog
 {
@@ -135,6 +136,8 @@ void pretraga_po_imenu_prezimenu(CVOR** pglava)
         printf("===================================\n");
     }
 }
+
+
 
 int pristup_HR_aplikaciji()
 {
@@ -590,10 +593,10 @@ int provjera_licence()
     printf("Unesite alfanumericki kljuc: ");
     scanf("%s",s);
     FILE* fp;
-    if((fp=fopen("Config.txt","r"))!=NULL)
+    if((fp=fopen("Licenca.txt","r"))!=NULL)
     {
         char licenca[MAX],pom[MAX];
-        fscanf(fp,"%s %s %d", pom, licenca,&moguciBrojPrijava);
+        fscanf(fp,"%s\n", licenca);
         if(strcmp(licenca,s)==0)
             return 1;
         else
@@ -602,8 +605,15 @@ int provjera_licence()
 }
 int main()
 {
-    int moguciBrPrijavaNaSistem;
     int indikator=0;
+    FILE* fp;
+    char pom1[MAX],pom2[MAX];
+    if((fp=fopen("Config.txt","r"))!=NULL)
+    {
+        fscanf(fp,"%s %s %d\n",pom1,pom2,&moguciBrojPrijava);
+        fclose(fp);
+    }
+    else printf("ERROR! Nemoguce otvoriti konfiguracioni fajl!\n");
     char kraj[MAX]="";
     if((provjera_licence())==1)
     {
