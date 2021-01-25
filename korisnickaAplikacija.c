@@ -3,6 +3,25 @@
 #include <string.h>
 #include <stdio.h>
 #define MAX 50
+#define MAX1 100
+
+void InformacijeOFirmi()
+{
+    FILE* fp;
+    char pom[MAX1];
+    printf("\n");
+    if((fp=fopen("Config.txt","r"))!=NULL)
+    {
+        fgets(pom,100,fp);
+        fgets(pom,100,fp);
+        while(fgets(pom,100,fp))
+        {
+            printf("%s",pom);
+        }
+        fclose(fp);
+    }
+    printf("\n");
+}
 
 struct TIME {
    int seconds;
@@ -28,7 +47,6 @@ typedef struct zaposleni
     char JMB[14];
     STATUS status;
     int poc_pl;
-    char dodatneinfo[MAX];
 } ZAPOSLENI;
 
 struct TIME differenceBetweenTimePeriod(struct TIME start,struct TIME stop)
@@ -72,6 +90,7 @@ void korisnickaAplikacija(int pin,char *jmb)
         printf(" -Pregled licnih podataka [PODACI]\n");
         printf(" -Pregled radnog vremena [VRIJEME]\n");
         printf(" -Pregled ukupnog radnog vremena u satima po danima [UKUPNO]\n");
+        printf(" -Informacije o kompaniji [INFO]\n");
         printf(" -Kraj [KRAJ]\n");
         printf("\nODABERITE OPCIJU:");
         scanf("%s",opcija);
@@ -87,20 +106,19 @@ void korisnickaAplikacija(int pin,char *jmb)
                 printf("\n\nLicni podaci:");
                 printf("\n-------------------------------------------------------------------------------------------\n");
 
-                while((fscanf(data,"%s %s %s %d %d %d %s %s %s %d %d %d %c %d %d %d %s %d %s\n",r.ime,r.prezime,r.mjbor,&r.dpu.dan,&r.dpu.mjesec,&r.dpu.godina,r.rsektr,r.rmj,r.status.status,&r.dz.dan,&r.dz.mjesec,&r.dz.godina,&c,&r.status.prekidzpsl.dan,&r.status.prekidzpsl.mjesec,&r.status.prekidzpsl.godina,r.JMB,&r.poc_pl,r.dodatneinfo))!=EOF)
+                while((fscanf(data,"%s %s %s %d %d %d %s %s %s %d %d %d %c %d %d %d %s %d %*d\n",r.ime,r.prezime,r.mjbor,&r.dpu.dan,&r.dpu.mjesec,&r.dpu.godina,r.rsektr,r.rmj,r.status.status,&r.dz.dan,&r.dz.mjesec,&r.dz.godina,&c,&r.status.prekidzpsl.dan,&r.status.prekidzpsl.mjesec,&r.status.prekidzpsl.godina,r.JMB,&r.poc_pl))!=EOF)
                     if((strcmp(r.JMB,jmb))==0)
                     {
                         printf(" IME: %s\n",r.ime);
                         printf(" PREZIME: %s\n",r.prezime);
                         printf(" MJESTO BORAVKA: %s\n",r.mjbor);
-                        printf(" DATUM POTPISIVANJA UGOVORA: %02d %02d %02d\n",r.dpu.dan,r.dpu.mjesec,r.dpu.godina);
+                        printf(" DATUM POTPISIVANJA UGOVORA: %02d.%02d.%02d\n",r.dpu.dan,r.dpu.mjesec,r.dpu.godina);
                         printf(" RADNI SEKTOR: %s\n",r.rsektr);
                         printf(" RADNO MJESTO: %s\n",r.rmj);
                         printf(" STATUS: %s\n",r.status.status);
-                        printf(" RADNI PERIOD(datum zaposlenja-datum raskida ugovora): %02d %02d %02d - %02d %02d %02d\n",r.dz.dan,r.dz.mjesec,r.dz.godina,r.status.prekidzpsl.dan,r.status.prekidzpsl.mjesec,r.status.prekidzpsl.godina);
+                        printf(" RADNI PERIOD(datum zaposlenja-datum raskida ugovora): %02d.%02d.%02d - %02d.%02d.%02d\n",r.dz.dan,r.dz.mjesec,r.dz.godina,r.status.prekidzpsl.dan,r.status.prekidzpsl.mjesec,r.status.prekidzpsl.godina);
                         printf(" MATICNI BROJ: %s\n",r.JMB);
-                        printf(" PLATA: %d\n",r.poc_pl);
-                        printf(" BITNE NAPOMENE: %s",r.dodatneinfo);
+                        printf(" PLATA: %d",r.poc_pl);
                     }
                 printf("\n-------------------------------------------------------------------------------------------\n\n");
             }
@@ -180,6 +198,13 @@ void korisnickaAplikacija(int pin,char *jmb)
             else printf("Greska prilikom otvaranja datoteke!Ne postoji registar radnika!\n Prvo je potrebno koristiti aplikaciju za evidentiranje vremena!\n");
             fclose(time);
         }
+        else if((strcmp(opcija,"INFO"))==0)
+        {
+            printf("\n\nKONTAKT INFORMACIJE:");
+            printf("\n------------------------------------------------------");
+            InformacijeOFirmi();
+            printf("------------------------------------------------------\n\n");
+        }
         else if((strcmp(opcija,"KRAJ"))==0)
             break;
     }
@@ -187,6 +212,17 @@ void korisnickaAplikacija(int pin,char *jmb)
 
 int main()
 {
+    FILE* firma;
+    char imefirme[MAX1], pom[MAX1];
+    if((firma=fopen("Config.txt","r"))!=NULL)
+    {
+        fgets(pom,100,firma);
+        fgets(imefirme,100,firma);
+        printf("%s\n",imefirme);
+        fclose(firma);
+    }
+    else printf("ERROR! Ne postoji konfiguraciona datoteka!\n");
+
     char korisnik[50];
     char lozinka[50];
     char korisnikDat[50];
