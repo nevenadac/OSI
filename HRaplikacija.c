@@ -9,7 +9,6 @@
 static int prijaveNaSistem;
 int moguciBrojPrijava;
 
-
 typedef struct novi_nalog
 {
     char korisnicko_ime[MAX],PIN[MAX];
@@ -54,7 +53,6 @@ void dodaj_u_listu(CVOR **pglava, ZAPOSLENI data)
     novi->next=*pglava;
     *pglava=novi;
 }
-
 
 void brisi_listu(CVOR **pglava)
 {
@@ -260,11 +258,13 @@ void dodavanje_novog_zaposlenog(int m, char licenca[])
         printf("Prezime radnika: ");
         scanf("%s",r.prezime);
         printf("Radno mjesto: ");
-        scanf("%s",r.rmj);
+        getchar();
+        gets(r.rmj);
         printf("Radni sektor: ");
         scanf("%s",r.rsektr);
         printf("Mjesto stalnog boravka radnika: ");
-        scanf("%s",r.mjbor);
+        getchar();
+        gets(r.mjbor);
         printf("Jedinstveni maticni broj radnika: ");
         scanf("%s",r.JMB);
         printf("Datum zaposlenja[d m g]: ");
@@ -381,9 +381,6 @@ void pregled_prijave_radnogvr(CVOR** pglava)
             if(strcmpi(trenutni->info.ime,ime)==0 && strcmpi(trenutni->info.prezime, prezime)==0)
             {
                 indikator_pretrage=1;
-                //printf("Pronadjen radnik pod imenom %s %s.\n",ime, prezime);
-
-
                 char tekst[200];
                 char datName[50];
                 itoa(trenutni->info.PIN,datName,10);
@@ -397,8 +394,7 @@ void pregled_prijave_radnogvr(CVOR** pglava)
                     printf("\n----------------------------------------------\n\n");
                     fclose(fp);
                 }
-               // else
-                  //  printf("Greska prilikom otvaranja datoteke!Ne postoji registar ovog radnika!\nVrijeme pristupa kompaniji se upisuje u registar u aplikaciji za evidentiranje vremena!\n");
+
             }
             trenutni=trenutni->next;
         }
@@ -685,4 +681,3 @@ int main()
     }
     return 0;
 }
-
