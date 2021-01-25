@@ -4,10 +4,11 @@
 #include <string.h>
 #include <time.h>
 #define MAX 50
+#define MAX1 100
 
 static int prijaveNaSistem;
 int moguciBrojPrijava;
-//int m;
+
 
 typedef struct novi_nalog
 {
@@ -74,6 +75,22 @@ void pisi_header_u_fajl(FILE *dat)
     fprintf(dat,
             "=============== =============== =============== ====================== =============== =============== ========== ==================================================== ============= ===== ====\n");
 }
+void InformacijeOFirmi()
+{
+    FILE* fp;
+    char pom[MAX1];
+    if((fp=fopen("Config.txt","r"))!=NULL)
+    {
+        fgets(pom,100,fp);
+        fgets(pom,100,fp);
+        while(fgets(pom,100,fp))
+        {
+            printf("%s",pom);
+        }
+        fclose(fp);
+    }
+    printf("\n\n");
+}
 int ucitavanje_iz_datoteke(CVOR** pglava)
 {
     int m=0;
@@ -136,8 +153,6 @@ void pretraga_po_imenu_prezimenu(CVOR** pglava)
         printf("===================================\n");
     }
 }
-
-
 
 int pristup_HR_aplikaciji()
 {
@@ -564,6 +579,7 @@ void upotreba_HR_aplikacije(char licenca[])
         printf("4. Pregled svih radnika po sektoru.\n");
         printf("5. Pregled svih radnika po radnom mjestu.\n");
         printf("6. Pretraga radnika po imenu ili prezimenu.\n");
+        printf("7. Informacije.\n");
         printf("===================================\n");
         printf("Vas izbor: ");
         scanf("%d",&i);
@@ -579,6 +595,8 @@ void upotreba_HR_aplikacije(char licenca[])
             pregled_po_rmjestu(&glava);
         else if(i==6)
             pretraga_po_imenu_prezimenu(&glava);
+        else if(i==7)
+            InformacijeOFirmi();
         else
             printf("NEPOZNATA OPCIJA.\n");
         printf("Ukoliko zelite da prekinete unesite KRAJ, u suprotnom unesite bilo koje slovo sa tastature! ");
@@ -605,6 +623,17 @@ int provjera_licence()
 }
 int main()
 {
+    FILE* firma;
+    char imefirme[MAX1], pom[MAX1];
+
+    if((firma=fopen("Config.txt","r"))!=NULL)
+    {
+        fgets(pom,100,firma);
+        fgets(imefirme,100,firma);
+        printf("%s\n",imefirme);
+        fclose(firma);
+    }
+    else printf("ERROR!");
     int indikator=0;
     FILE* fp;
     char pom1[MAX],pom2[MAX];
