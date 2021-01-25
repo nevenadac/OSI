@@ -1,0 +1,9 @@
+Broj Prijava 50
+Naziv_Firme
+Vazne e-mail adrese:
+ime.prezime@mail.ext
+ime.prezime@mail.ext
+
+Vazni brojevi telefona:
+000-000-000
+000-000-000
