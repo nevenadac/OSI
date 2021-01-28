@@ -8,6 +8,20 @@ typedef struct info
     char hrLozinka[20];
 } INFO;
 
+typedef struct nalog
+{
+    char JMB[14];
+    char korisnickoIme[20];
+    char lozinka[20];
+    int pin;
+}KNALOG;
+
+typedef struct cvor1
+{
+    struct cvor1* next;
+    KNALOG info;
+} CVOR1;
+
 typedef struct cvor
 {
     struct cvor* next;
@@ -19,6 +33,15 @@ void pisi(CVOR *glava, FILE *fp)
     while (glava)
     {
         fprintf(fp, "%s %s\n", glava->info.korisnickoIme,glava->info.hrLozinka);
+        glava = glava->next;
+    }
+}
+
+void pisi2(CVOR1 *glava, FILE *fp)
+{
+    while (glava)
+    {
+        fprintf(fp, "%s %s %s %d\n", glava->info.JMB,glava->info.korisnickoIme,glava->info.lozinka,glava->info.pin);
         glava = glava->next;
     }
 }
@@ -47,8 +70,18 @@ void aktiviraj(FILE *fp)
         fclose(fp);
     }
 
-    printf("Unesite lozinku:");
-    scanf("%s",hrLozinka);
+    //printf("Unesite lozinku:");
+    //scanf("%s",hrLozinka);
+    while(1)
+    {
+        printf("Unesite lozinku:");
+        scanf("%s",hrLozinka);
+        if((strlen(hrLozinka))>5)
+            break;
+        else
+            printf("Lozinka mora imati minimalno 6 znakova!\n");
+    }
+
     if((fp=fopen("HRkorisnickinalozi.txt","a")))
     {
         fprintf(fp,"%s %s\n",ime,hrLozinka);
@@ -67,11 +100,30 @@ CVOR* dodaj_u_listu(CVOR **pglava,INFO data)
     return novi;
 }
 
+CVOR1* dodaj_u_listu1(CVOR1 **pglava,KNALOG data)
+{
+    CVOR1 *novi=(CVOR1*)malloc(sizeof(CVOR1));
+    novi->info=data;
+    novi->next=*pglava;
+    *pglava=novi;
+    return novi;
+}
+
 void brisi_listu(CVOR **pglava)
 {
     while(*pglava)
     {
         CVOR* p=(*pglava)->next;
+        free(*pglava);
+        *pglava=p;
+    }
+}
+
+void brisi_listu1(CVOR1 **pglava)
+{
+    while(*pglava)
+    {
+        CVOR1* p=(*pglava)->next;
         free(*pglava);
         *pglava=p;
     }
@@ -84,7 +136,7 @@ void deleteNode(CVOR **head_ref,char * key)
     {
         *head_ref = temp->next;
         free(temp);
-        printf("\nNalog je uspjesno deaktiviran!\n");
+        printf("\nHR nalog je uspjesno deaktiviran!\n");
         return;
     }
     while (temp != NULL && strcmp(temp->info.korisnickoIme,key))
@@ -99,7 +151,32 @@ void deleteNode(CVOR **head_ref,char * key)
     }
     prev->next = temp->next;
     free(temp);
-    printf("\nNalog je uspjesno deaktiviran!\n");
+    printf("\nHR nalog je uspjesno deaktiviran!\n");
+}
+
+void deleteNode1(CVOR1 **head_ref,char * key)
+{
+    CVOR1* temp = *head_ref, *prev;
+    if (temp != NULL && strcmp(temp->info.korisnickoIme,key)==0)
+    {
+        *head_ref = temp->next;
+        free(temp);
+        printf("\nKorisnicki nalog je uspjesno deaktiviran!\n");
+        return;
+    }
+    while (temp != NULL && strcmp(temp->info.korisnickoIme,key))
+    {
+        prev = temp;
+        temp = temp->next;
+    }
+    if (temp == NULL)
+    {
+        printf("\nUneseno korisnicko ime ne postoji!\n");
+        return;
+    }
+    prev->next = temp->next;
+    free(temp);
+    printf("\nKorisnicki nalog je uspjesno deaktiviran!\n");
 }
 
 void deaktivacijaHrNaloga()
@@ -123,6 +200,26 @@ void deaktivacijaHrNaloga()
     brisi_listu(&head);
 }
 
+void deaktivacijaKorisnickihNaloga()
+{
+    char korIme[25];
+    KNALOG nalogDat;
+    CVOR1 *head=NULL;
+    printf("Unesite korisnicko ime radnika ciji korisnicki nalog zelite da deaktivirate:");
+    scanf("%s",korIme);
+    FILE* nalozi;
+    if((nalozi=fopen("korisnickiNalozi.txt","r")))
+    {
+        while((fscanf(nalozi,"%s %s %s %d\n",nalogDat.JMB,nalogDat.korisnickoIme,nalogDat.lozinka,&nalogDat.pin))!=EOF)
+            dodaj_u_listu1(&head,nalogDat);
+    }
+    fclose(nalozi);
+    deleteNode1(&head,korIme);
+    if((nalozi=fopen("korisnickiNalozi.txt","w")))
+        pisi2(head,nalozi);
+    fclose(nalozi);
+    brisi_listu1(&head);
+}
 
 int broj_korisnika(FILE *fp,int m,INFO info)
 {
@@ -151,7 +248,7 @@ int main(int argc, char*argv[])
         printf("%s\n",s);
         fclose(fp);
     }
-    printf("Unesite administratorsku lozinku: \n");
+    printf("Unesite administratorsku lozinku:");
     scanf("%s",pin);
     if((fp=fopen("admin.txt","r")))
     {
@@ -159,13 +256,13 @@ int main(int argc, char*argv[])
         if(!strcmp(s,pin))
         {
             printf("Da li posjedujete licencu?\n");
-            printf("Ako imate unesite '1', inace unesite '2':\n");
+            printf("Ako imate unesite '1', inace unesite '2':");
             scanf("%d",&broj);
             if(broj==1)
             {
                 do
                 {
-                    printf("Unesite alfanumericki kljuc:\n");
+                    printf("Unesite alfanumericki kljuc:");
                     scanf("%s",unos);
                 }
                 while(!strcmp(lozinka,unos)==0);
@@ -189,7 +286,7 @@ int main(int argc, char*argv[])
                     }
                     else if(b=='K')
                     {
-                        //deaktivacijaKorisnickihNaloga();
+                        deaktivacijaKorisnickihNaloga();
                     }
                     else if(b=='I')
                     {
@@ -240,12 +337,12 @@ int main(int argc, char*argv[])
                     }
                     else if(b=='K')
                     {
-                        //deaktivacijaKorisnickihNaloga();
+                        deaktivacijaKorisnickihNaloga();
                     }
                     else if(b=='I')
                     {
                         printf("\n\nKONTAKT INFORMACIJE:");
-                        printf("\n------------------------------------------------------");
+                        printf("\n------------------------------------------------------\n");
                         if((fp=fopen("Config.txt","r")))
                         {
                             fgets(s,100,fp);
@@ -257,7 +354,7 @@ int main(int argc, char*argv[])
                             fclose(fp);
                         }
                         else printf("Greska prilikom otvaranja konfiguracionog fajla!\n");
-                        printf("------------------------------------------------------\n\n");
+                        printf("\n------------------------------------------------------\n\n");
                     }
                     else if(b!='0')
                         printf("Nepoznata opcija.\n");
