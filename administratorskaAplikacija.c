@@ -6,6 +6,7 @@ typedef struct info
 {
     char korisnickoIme[20];
     char hrLozinka[20];
+    int brojPr;
 } INFO;
 
 typedef struct nalog
@@ -14,6 +15,7 @@ typedef struct nalog
     char korisnickoIme[20];
     char lozinka[20];
     int pin;
+    int brojPr;
 }KNALOG;
 
 typedef struct cvor1
@@ -32,7 +34,7 @@ void pisi(CVOR *glava, FILE *fp)
 {
     while (glava)
     {
-        fprintf(fp, "%s %s\n", glava->info.korisnickoIme,glava->info.hrLozinka);
+        fprintf(fp, "%s %s %d\n", glava->info.korisnickoIme,glava->info.hrLozinka,glava->info.brojPr);
         glava = glava->next;
     }
 }
@@ -41,7 +43,7 @@ void pisi2(CVOR1 *glava, FILE *fp)
 {
     while (glava)
     {
-        fprintf(fp, "%s %s %s %d\n", glava->info.JMB,glava->info.korisnickoIme,glava->info.lozinka,glava->info.pin);
+        fprintf(fp, "%s %s %s %d %d\n", glava->info.JMB,glava->info.korisnickoIme,glava->info.lozinka,glava->info.pin,glava->info.brojPr);
         glava = glava->next;
     }
 }
@@ -51,6 +53,7 @@ void aktiviraj(FILE *fp)
     char korisnickoIme[20];
     char ime[20];
     char hrLozinka[20];
+    int br=0;
     printf("\nUnesite korisnicko ime:");
     scanf("%s",ime);
     if((fp=fopen("HRkorisnickinalozi.txt","r"))!=NULL)
@@ -84,7 +87,7 @@ void aktiviraj(FILE *fp)
 
     if((fp=fopen("HRkorisnickinalozi.txt","a")))
     {
-        fprintf(fp,"%s %s\n",ime,hrLozinka);
+        fprintf(fp,"%s %s %d\n",ime,hrLozinka,br);
         printf("\nHR nalog uspjesno kreiran!\n");
     }
     else printf("Greska prilikom otvaranja datoteke sa HR nalozima!\n");
@@ -189,7 +192,7 @@ void deaktivacijaHrNaloga()
     FILE* nalozi;
     if((nalozi=fopen("HRkorisnickinalozi.txt","r")))
     {
-        while((fscanf(nalozi,"%s %s\n",nalogDat.korisnickoIme,nalogDat.hrLozinka))!=EOF)
+        while((fscanf(nalozi,"%s %s %d\n",nalogDat.korisnickoIme,nalogDat.hrLozinka,&nalogDat.brojPr))!=EOF)
             dodaj_u_listu(&head,nalogDat);
     }
     fclose(nalozi);
@@ -210,7 +213,7 @@ void deaktivacijaKorisnickihNaloga()
     FILE* nalozi;
     if((nalozi=fopen("korisnickiNalozi.txt","r")))
     {
-        while((fscanf(nalozi,"%s %s %s %d\n",nalogDat.JMB,nalogDat.korisnickoIme,nalogDat.lozinka,&nalogDat.pin))!=EOF)
+        while((fscanf(nalozi,"%s %s %s %d %d\n",nalogDat.JMB,nalogDat.korisnickoIme,nalogDat.lozinka,&nalogDat.pin,&nalogDat.brojPr))!=EOF)
             dodaj_u_listu1(&head,nalogDat);
     }
     fclose(nalozi);
@@ -225,7 +228,7 @@ int broj_korisnika(FILE *fp,int m,INFO info)
 {
     if((fp=fopen("HRkorisnickinalozi.txt","r")))
     {
-        while(fscanf(fp,"%s %s",info.korisnickoIme,info.hrLozinka)!=EOF)
+        while(fscanf(fp,"%s %s %d\n",info.korisnickoIme,info.hrLozinka,&info.brojPr)!=EOF)
             m++;
     }
     return m;
