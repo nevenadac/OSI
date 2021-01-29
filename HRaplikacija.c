@@ -9,6 +9,7 @@
 static int prijaveNaSistem;
 int moguciBrojPrijava;
 
+
 typedef struct novi_nalog
 {
     char korisnicko_ime[MAX],PIN[MAX];
@@ -54,6 +55,7 @@ void dodaj_u_listu(CVOR **pglava, ZAPOSLENI data)
     *pglava=novi;
 }
 
+
 void brisi_listu(CVOR **pglava)
 {
     while(*pglava)
@@ -87,6 +89,8 @@ void InformacijeOFirmi()
         }
         fclose(fp);
     }
+    else
+        printf("ERROR! Ne postoji konfiguraciona datoteka.\n");
     printf("\n\n");
 }
 int ucitavanje_iz_datoteke(CVOR** pglava)
@@ -108,10 +112,12 @@ int ucitavanje_iz_datoteke(CVOR** pglava)
             dodaj_u_listu(pglava,r);
             m++;
         }
-         printf("Trenutan broj radnika je: %d\n",m);
+        printf("Trenutan broj radnika je: %d\n",m);
         fclose(fp);
         return m;
     }
+    else
+        printf("ERROR! Ne postoji datoteka sa podacima.\n");
     return 0;
 }
 
@@ -211,12 +217,16 @@ int pristup_HR_aplikaciji()
         }
         fclose(fp);
     }
+    else
+        printf("ERROR! Ne postoji datoteka sa HR nalozima.\n ");
     if((fp=fopen("HRkorisnickinalozi.txt","w"))!=NULL)
     {
         for(int k=0; k<i; k++)
             fprintf(fp,"%s %s %d\n", niz[k].korisnicko_ime,niz[k].PIN,niz[k].brojPrijava);
         fclose(fp);
     }
+    else
+        printf("ERROR!");
 
     if(flag2==0)
     {
@@ -233,6 +243,28 @@ int pristup_HR_aplikaciji()
         printf("PRISTUP HR APLIKACIJI OMOGUCEN!\n");
         return 1;
     }
+}
+
+int provjeri_kor_ime(char kor_ime[])
+{
+    FILE* fp;
+    char username[MAX],pom1[MAX],pom2[MAX];
+    int d;
+    int flag=0;
+    if((fp=fopen("korisnickiNalozi.txt","r"))!=NULL)
+    {
+        while((fscanf(fp,"%s %s %s %d\n",pom1,username,pom2,&d))!=EOF)
+        {
+            if(strcasecmp(username,kor_ime)==0)
+                flag=1;
+        }
+        fclose(fp);
+    }
+    else
+        printf("ERROR! Ne postoji datoteka sa korisnickim nalozima.\n");
+    if(flag==1)
+        return 1;
+    else return 0;
 }
 
 void dodavanje_novog_zaposlenog(int m, char licenca[])
@@ -278,25 +310,20 @@ void dodavanje_novog_zaposlenog(int m, char licenca[])
         r.status.prekidzpsl.mjesec=0;
         r.status.prekidzpsl.godina=00;
         printf("Kreiranje korisnickog naloga->\n");
-        printf("Unesite korisnicko ime zaposlenog: ");
+        printf("Unesite korisnicko ime: ");
         char username[MAX];
         scanf("%s",username);
-        if((fp2=fopen("korisnickiNalozi.txt","r"))!=NULL)
+        int flag1=0;
+        do
         {
-            while((fscanf(fp2,"%s %s %s %d\n",JMB,ime,lozinka,&PIN)!=EOF))
+            flag1=provjeri_kor_ime(username);
+            if(flag1==1)
             {
-                if(strcasecmp(username,ime)==0)
-                {
-                    do
-                    {
-                        printf("Uneseno korisnicko ime vec postoji! Unesite novo korisnicko ime! ");
-                        scanf("%s",username);
-                    }
-                    while(strcasecmp(username,ime)==0);
-                }
+                printf("Uneseno korisnicko ime vec postoji! Unesite novo korisnicko ime! ");
+                scanf("%s",username);
             }
-            fclose(fp2);
         }
+        while(flag1==1);
         char lozinka[MAX];
         printf("Unesite lozinku korisnika: ");
         scanf("%s",lozinka);
@@ -394,6 +421,8 @@ void pregled_prijave_radnogvr(CVOR** pglava)
                     printf("\n----------------------------------------------\n\n");
                     fclose(fp);
                 }
+                else
+                    printf("ERROR! Ne postoji registar radnika. Unos radnog vremena se vrsi u aplikaciji za evidentiranje radnog vremena.\n");
 
             }
             trenutni=trenutni->next;
@@ -471,6 +500,8 @@ void aktivacija_deaktivacija()
                 }
                 fclose(fp);
             }
+            else
+                printf("ERROR! Nemoguce otvoriti datoteku sa podacima.\n");
             return;
         }
     }
@@ -565,7 +596,7 @@ void upotreba_HR_aplikacije(char licenca[])
     do
     {
         printf("===================================\n");
-        printf("Izaberite opciju 1,2,3,4,5,6:\n");
+        printf("Izaberite opciju 1,2,3,4,5,6 ili 7:\n");
         printf("1. Dodavanje novog zaposlenog.\n");
         printf("2. Pregled prijave radnog vremena radnika.\n");
         printf("3. Aktivacija/deaktivacija zaposlenog.\n");
@@ -681,3 +712,4 @@ int main()
     }
     return 0;
 }
+
