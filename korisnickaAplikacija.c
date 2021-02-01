@@ -5,6 +5,8 @@
 #define MAX 50
 #define MAX1 100
 
+int moguciBrojPrijava;
+
 void InformacijeOFirmi()
 {
     FILE* fp;
@@ -23,7 +25,8 @@ void InformacijeOFirmi()
     printf("\n");
 }
 
-struct TIME {
+struct TIME
+{
    int seconds;
    int minutes;
    int hours;
@@ -207,16 +210,29 @@ void korisnickaAplikacija(int pin,char *jmb)
         }
         else if((strcmp(opcija,"KRAJ"))==0)
             break;
+        else
+            printf("\nNepoznata opcija!\n");
     }
 }
+
+typedef struct novi_nalog
+{
+    char jmb[14];
+    int PIN;
+    char korisnicko_ime[MAX],lozinka[MAX];
+    int brojPrijava;
+
+} NOVI_NALOG;
 
 int main()
 {
     FILE* firma;
-    char imefirme[MAX1], pom[MAX1];
+    NOVI_NALOG novi;
+    char imefirme[MAX1];
+
     if((firma=fopen("Config.txt","r"))!=NULL)
     {
-        fgets(pom,100,firma);
+        fscanf(firma,"%*s %*s %d\n",&moguciBrojPrijava);
         fgets(imefirme,100,firma);
         printf("%s\n",imefirme);
         fclose(firma);
@@ -225,44 +241,90 @@ int main()
 
     char korisnik[50];
     char lozinka[50];
-    char korisnikDat[50];
-    char lozinkaDat[50];
-    int pin;
-    char jmb[14];
     FILE *dat;
 
     while(1)
     {
-        printf("Unesite korisnicko ime:");
+        printf("Unesite korisnicko ime: ");
         scanf("%s",korisnik);
-        printf("Unesite lozinku:");
-        scanf("%s",lozinka);
         int flag1=0;
         int flag2=0;
-
+        NOVI_NALOG niz[200];
+        int i=0;
         if((dat=fopen("korisnickiNalozi.txt","r")))
         {
-            while((fscanf(dat,"%s %s %s %d\n",jmb,korisnikDat,lozinkaDat,&pin))!=EOF)
+
+            while((fscanf(dat,"%s %s %s %d %d\n",novi.jmb,novi.korisnicko_ime,novi.lozinka,&novi.PIN,&novi.brojPrijava))!=EOF)
             {
-                if((strcmp(korisnik,korisnikDat))==0)
+                if((strcmp(korisnik,novi.korisnicko_ime))==0)
                 {
-                    flag1=1;
-                    if((strcmp(lozinka,lozinkaDat))==0)
+                    flag2=1;
+                    if(novi.brojPrijava==moguciBrojPrijava)
                     {
-                        korisnickaAplikacija(pin,jmb);
-                        flag2=1;
+                        printf("Morate promijeniti lozinku!\nUnesite staru lozinku: ");
+                        scanf("%s",lozinka);
+                        if(strcmp(lozinka,novi.lozinka)==0)
+                        {
+                            flag1=1;
+                            do
+                            {
+                                while(1)
+                                {
+                                    printf("Unesite novu lozinku: ");
+                                    scanf("%s",lozinka);
+                                    if((strlen(lozinka))>5)
+                                        break;
+                                    else
+                                        printf("Lozinka mora imati minimalno 6 znakova!\n");
+                                }
+                                if(strcasecmp(lozinka,novi.lozinka)==0)
+                                {
+                                    printf("Nova lozinka ne moze biti stara lozinka!\n");
+                                }
+                            }
+                            while(strcasecmp(lozinka,novi.lozinka)==0);
+                            strcpy(novi.lozinka,lozinka);
+                            novi.brojPrijava=0;
+                            korisnickaAplikacija(novi.PIN,novi.jmb);
+                        }
+                    }
+                    else
+                    {
+                        printf("Unesite lozinku: ");
+                        scanf("%s",lozinka);
+                        if(strcmp(lozinka,novi.lozinka)==0)
+                        {
+                            flag1=1;
+                            novi.brojPrijava++;
+                            korisnickaAplikacija(novi.PIN,novi.jmb);
+                        }
                     }
                 }
+                strcpy(niz[i].korisnicko_ime,novi.korisnicko_ime);
+                strcpy(niz[i].lozinka,novi.lozinka);
+                strcpy(niz[i].jmb,novi.jmb);
+                niz[i].PIN=novi.PIN;
+                niz[i].brojPrijava=novi.brojPrijava;
+                i++;
             }
-            if(flag1==1 && flag2==1)
-                break;
-            else if(flag1==0)
-                printf("\nUneseno korisnicko ime ne postoji!\n\n");
-            else if(flag2==0)
-                printf("\nNetacna lozinka!\n\n");
+            fclose(dat);
         }
         else printf("Greska prilikom otvaranja datoteke!Ne postoji ni jedan korisnicki nalog!\nKreiranje naloga se vrsi u HR aplikaciji!\n");
-        fclose(dat);
+
+        if((dat=fopen("korisnickiNalozi.txt","w"))!=NULL)
+        {
+            for(int k=0; k<i; k++)
+                fprintf(dat,"%s %s %s %d %d\n",niz[k].jmb,niz[k].korisnicko_ime,niz[k].lozinka,niz[k].PIN,niz[k].brojPrijava);
+            fclose(dat);
+        }
+        else
+            printf("ERROR!");
+        if(flag1==1 && flag2==1)
+                break;
+        else if(flag2==0)
+            printf("\nUneseno korisnicko ime ne postoji!\n\n");
+        else if(flag1==0)
+            printf("\nNetacna lozinka!\n\n");
     }
     return 0;
 }
