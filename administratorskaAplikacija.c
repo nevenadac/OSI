@@ -16,7 +16,7 @@ typedef struct nalog
     char lozinka[20];
     int pin;
     int brojPr;
-}KNALOG;
+} KNALOG;
 
 typedef struct cvor1
 {
@@ -48,30 +48,49 @@ void pisi2(CVOR1 *glava, FILE *fp)
     }
 }
 
+
+int provjeri_kor_ime(char kor_ime[])
+{
+    FILE* fp;
+    char username[20],pom2[20];
+    int d;
+    int flag=0;
+    if((fp=fopen("HRkorisnickinalozi.txt","r"))!=NULL)
+    {
+        while((fscanf(fp,"%s %s %d\n",username,pom2,&d))!=EOF)
+        {
+            if(strcasecmp(username,kor_ime)==0)
+                flag=1;
+        }
+        fclose(fp);
+    }
+    else
+        printf("ERROR! Ne postoji datoteka sa HR nalozima.\n");
+    if(flag==1)
+        return 1;
+    else
+        return 0;
+}
+
+
 void aktiviraj(FILE *fp)
 {
-    char korisnickoIme[20];
     char ime[20];
     char hrLozinka[20];
     int br=0;
     printf("\nUnesite korisnicko ime:");
     scanf("%s",ime);
-    if((fp=fopen("HRkorisnickinalozi.txt","r"))!=NULL)
+    int flag1=0;
+    do
     {
-        while((fscanf(fp,"%s %s\n",korisnickoIme,hrLozinka)!=EOF))
+        flag1=provjeri_kor_ime(ime);
+        if(flag1==1)
         {
-            if(strcasecmp(korisnickoIme,ime)==0)
-            {
-                do
-                {
-                    printf("Uneseno korisnicko ime vec postoji!\nUnesite novo korisnicko ime:");
-                    scanf("%s",ime);
-                }
-                while(strcasecmp(korisnickoIme,ime)==0);
-            }
+            printf("Uneseno korisnicko ime vec postoji! Unesite novo korisnicko ime! ");
+            scanf("%s",ime);
         }
-        fclose(fp);
     }
+    while(flag1==1);
 
     //printf("Unesite lozinku:");
     //scanf("%s",hrLozinka);
@@ -90,7 +109,8 @@ void aktiviraj(FILE *fp)
         fprintf(fp,"%s %s %d\n",ime,hrLozinka,br);
         printf("\nHR nalog uspjesno kreiran!\n");
     }
-    else printf("Greska prilikom otvaranja datoteke sa HR nalozima!\n");
+    else
+        printf("Greska prilikom otvaranja datoteke sa HR nalozima!\n");
     fclose(fp);
 }
 
@@ -215,12 +235,16 @@ void deaktivacijaKorisnickihNaloga()
     {
         while((fscanf(nalozi,"%s %s %s %d %d\n",nalogDat.JMB,nalogDat.korisnickoIme,nalogDat.lozinka,&nalogDat.pin,&nalogDat.brojPr))!=EOF)
             dodaj_u_listu1(&head,nalogDat);
+        fclose(nalozi);
     }
-    fclose(nalozi);
+    else
+        printf("Ne postoji datoteka sa korisnickim nalozima.\n");
     deleteNode1(&head,korIme);
     if((nalozi=fopen("korisnickiNalozi.txt","w")))
+    {
         pisi2(head,nalozi);
-    fclose(nalozi);
+        fclose(nalozi);
+    }
     brisi_listu1(&head);
 }
 
@@ -236,9 +260,10 @@ int broj_korisnika(FILE *fp,int m,INFO info)
 
 int main(int argc, char*argv[])
 {
-    char *lozinka="admin123";
+    char *lozinka="alfanumkey123";
     char unos[20];
-    char pin[10];
+    char pin[20];
+    char lozinka_admin[20];
     char b;
     FILE *fp;
     INFO info;
@@ -251,127 +276,137 @@ int main(int argc, char*argv[])
         printf("%s\n",s);
         fclose(fp);
     }
-    printf("Unesite administratorsku lozinku:");
-    scanf("%s",pin);
-    if((fp=fopen("admin.txt","r")))
+    else
+        printf("ERROR! Ne postoji konfiguracioni fajl!\n");
+    if((fp=fopen("admin.txt","r"))!=NULL)
     {
-        fgets(s,100,fp);
-        if(!strcmp(s,pin))
+        printf("Unesite administratorsku lozinku:");
+        scanf("%s",pin);
+
+        fscanf(fp,"%s",s);
+        if(strcmp(s,pin)==0)
         {
             printf("Da li posjedujete licencu?\n");
             printf("Ako imate unesite '1', inace unesite '2':");
             scanf("%d",&broj);
             if(broj==1)
             {
-                do
+                printf("Unesite alfanumericki kljuc:");
+                scanf("%s",unos);
+                if(!strcmp(lozinka,unos)==0)
+                    do
+                    {
+                        printf("Neispravna lozinka! Ukoliko ne zelite da nastavite unesite KRAJ, inace unesite ponovo lozinku! ");
+                        scanf("%s",unos);
+                    }
+                    while(strcmp(lozinka,unos)!=0 && strcasecmp(unos,"KRAJ")!=0);
+                if(strcasecmp(unos,"KRAJ")!=0)
                 {
-                    printf("Unesite alfanumericki kljuc:");
-                    scanf("%s",unos);
-                }
-                while(!strcmp(lozinka,unos)==0);
-                do
-                {
-                    printf("\nOpcije:\n");
-                    printf(" -Aktivacija HR naloga 'A'\n");
-                    printf(" -Deaktivacija HR naloga 'D'\n");
-                    printf(" -Deaktivacija naloga za korisnicku aplikaciju 'K'\n");
-                    printf(" -Informacije o kompaniji 'I'\n");
-                    printf(" -Kraj '0'\n");
-                    printf("\nODABERITE OPCIJU:");
-                    scanf("\n%c",&b);
-                    if(b=='A')
+                    do
                     {
-                        aktiviraj(fp);
-                    }
-                    else if(b=='D')
-                    {
-                        deaktivacijaHrNaloga();
-                    }
-                    else if(b=='K')
-                    {
-                        deaktivacijaKorisnickihNaloga();
-                    }
-                    else if(b=='I')
-                    {
-                        printf("\n\nKONTAKT INFORMACIJE:");
-                        printf("\n------------------------------------------------------\n");
-                        if((fp=fopen("Config.txt","r")))
+                        printf("\nOpcije:\n");
+                        printf(" -Aktivacija HR naloga 'A'\n");
+                        printf(" -Deaktivacija HR naloga 'D'\n");
+                        printf(" -Deaktivacija naloga za korisnicku aplikaciju 'K'\n");
+                        printf(" -Informacije o kompaniji 'I'\n");
+                        printf(" -Kraj '0'\n");
+                        printf("\nODABERITE OPCIJU:");
+                        scanf("\n%c",&b);
+                        if(b=='A')
                         {
-                            fgets(s,100,fp);
-                            fgets(s,100,fp);
-                            while(fgets(s,100,fp))
-                            {
-                                printf("%s",s);
-                            }
-                            fclose(fp);
-                        }
-                        else printf("Greska prilikom otvaranja konfiguracionog fajla!\n");
-                        printf("\n------------------------------------------------------\n\n");
-                    }
-                    else if(b!='0')
-                        printf("Nepoznata opcija.\n");
-                }
-                while(b!='0');
-
-
-            }
-            else if(broj==2)
-            {
-
-                do
-                {
-                    //printf("\nZa aktivaciju unesite 'A',za deaktivaciju 'D',za ispis informacija 'I',a za kraj '0':\n");
-                    printf("\nOpcije:");
-                    printf("\n -Aktivacija HR naloga 'A'\n -Deaktivacija HR naloga 'D'\n -Deaktivacija naloga za korisnicku aplikaciju 'K'\n -Informacije o kompaniji 'I'\n -Kraj '0'\n");
-                    printf("ODABERITE OPCIJU:");
-                    scanf("\n%c",&b);
-                    if(b=='A')
-                    {
-                        int i=broj_korisnika(fp,m,info);
-                        if(i>=3)
-                            printf("Nemoguce dodati kosinika zbog ogranicenja.\n");
-                        else
                             aktiviraj(fp);
-                    }
-                    else if(b=='D')
-                    {
-
-                        deaktivacijaHrNaloga();
-                    }
-                    else if(b=='K')
-                    {
-                        deaktivacijaKorisnickihNaloga();
-                    }
-                    else if(b=='I')
-                    {
-                        printf("\n\nKONTAKT INFORMACIJE:");
-                        printf("\n------------------------------------------------------\n");
-                        if((fp=fopen("Config.txt","r")))
-                        {
-                            fgets(s,100,fp);
-                            fgets(s,100,fp);
-                            while(fgets(s,100,fp))
-                            {
-                                printf("%s",s);
-                            }
-                            fclose(fp);
                         }
-                        else printf("Greska prilikom otvaranja konfiguracionog fajla!\n");
-                        printf("\n------------------------------------------------------\n\n");
+                        else if(b=='D')
+                        {
+                            deaktivacijaHrNaloga();
+                        }
+                        else if(b=='K')
+                        {
+                            deaktivacijaKorisnickihNaloga();
+                        }
+                        else if(b=='I')
+                        {
+                            printf("\n\nKONTAKT INFORMACIJE:");
+                            printf("\n------------------------------------------------------\n");
+                            if((fp=fopen("Config.txt","r")))
+                            {
+                                fgets(s,100,fp);
+                                fgets(s,100,fp);
+                                while(fgets(s,100,fp))
+                                {
+                                    printf("%s",s);
+                                }
+                                fclose(fp);
+                            }
+                            else
+                                printf("Greska prilikom otvaranja konfiguracionog fajla!\n");
+                            printf("\n------------------------------------------------------\n\n");
+                        }
+                        else if(b!='0')
+                            printf("Nepoznata opcija.\n");
                     }
-                    else if(b!='0')
-                        printf("Nepoznata opcija.\n");
+                    while(b!='0');
                 }
-                while(b!='0');
             }
-            else
-                printf("Greska.\n");
+                else if(broj==2)
+                {
+
+                    do
+                    {
+                        //printf("\nZa aktivaciju unesite 'A',za deaktivaciju 'D',za ispis informacija 'I',a za kraj '0':\n");
+                        printf("\nOpcije:");
+                        printf("\n -Aktivacija HR naloga 'A'\n -Deaktivacija HR naloga 'D'\n -Deaktivacija naloga za korisnicku aplikaciju 'K'\n -Informacije o kompaniji 'I'\n -Kraj '0'\n");
+                        printf("ODABERITE OPCIJU:");
+                        scanf("\n%c",&b);
+                        if(b=='A')
+                        {
+                            int i=broj_korisnika(fp,m,info);
+                            if(i>=3)
+                                printf("Nemoguce dodati kosinika zbog ogranicenja.\n");
+                            else
+                                aktiviraj(fp);
+                        }
+                        else if(b=='D')
+                        {
+
+                            deaktivacijaHrNaloga();
+                        }
+                        else if(b=='K')
+                        {
+                            deaktivacijaKorisnickihNaloga();
+                        }
+                        else if(b=='I')
+                        {
+                            printf("\n\nKONTAKT INFORMACIJE:");
+                            printf("\n------------------------------------------------------\n");
+                            if((fp=fopen("Config.txt","r")))
+                            {
+                                fgets(s,100,fp);
+                                fgets(s,100,fp);
+                                while(fgets(s,100,fp))
+                                {
+                                    printf("%s",s);
+                                }
+                                fclose(fp);
+                            }
+                            else
+                                printf("Greska prilikom otvaranja konfiguracionog fajla!\n");
+                            printf("\n------------------------------------------------------\n\n");
+                        }
+                        else if(b!='0')
+                            printf("Nepoznata opcija.\n");
+                    }
+                    while(b!='0');
+                }
+                else
+                    printf("Greska.\n");
             printf("\nKraj.\n");
-
         }
-        else
-            printf("Nemoguc pristup administratorskoj aplikaciji.\n");
-
-    }
-    return 0;
+    else
+        printf("ERROR! Neispravna lozinka! Pristup administratorskoj aplikaciji odbijen! Pokrenite program ponovo za novi pokusaj.\n");
+    fclose(fp);
+}
+else
+    printf("Ne postoji datoteka admin.txt!\n");
+return 0;
 }
