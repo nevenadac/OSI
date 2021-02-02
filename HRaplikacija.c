@@ -177,18 +177,33 @@ int pristup_HR_aplikaciji()
         {
             if(strcmp(n.korisnicko_ime,kor_ime)==0)
             {
+                int brojac=0;
                 flag2=1;
                 if(n.brojPrijava==moguciBrojPrijava)
                 {
-                    printf("Morate promijeniti lozinku!\nUnesite staru lozinku: ");
-                    scanf("%s",pin_kod);
-                    if(strcmp(pin_kod,n.PIN)==0)
+                    do
+                    {
+                        printf("Morate promijeniti lozinku!\nUnesite staru lozinku: ");
+                        scanf("%s",pin_kod);
+                        if(strcmp(pin_kod,n.PIN)!=0)
+                            printf("Neispravna stara lozinka!\n");
+                            brojac++;
+                    }
+                    while(strcmp(pin_kod,n.PIN)!=0 && brojac<6);
+                    if(strcmp(pin_kod,n.PIN)==0 && brojac<6)
                     {
                         flag1=1;
                         do
                         {
-                            printf("Unesite novu lozinku: ");
-                            scanf("%s",pind);
+                            while(1)
+                            {
+                                printf("Unesite lozinku: ");
+                                scanf("%s",pind);
+                                if((strlen(pind))>5)
+                                    break;
+                                else
+                                    printf("Lozinka mora imati minimalno 6 znakova!\n");
+                            }
                             if(strcasecmp(pind,n.PIN)==0)
                             {
                                 printf("Nova lozinka ne moze biti stara lozinka!\n");
@@ -197,16 +212,29 @@ int pristup_HR_aplikaciji()
                         while(strcasecmp(pind,n.PIN)==0);
                         strcpy(n.PIN,pind);
                         n.brojPrijava=0;
+                        printf("Lozinka uspjesno promijenjena.\n");
                     }
+                    else if(brojac>=6)
+                        printf("Unijeli ste pogresnu lozinku 5 puta. Pokusajte ponovo!\n");
                 }
                 else
                 {
-                    printf("Unesite lozinku: ");
-                    scanf("%s",pin_kod);
+                    int brojac=0;
+                    do
+                    {
+                        printf("Unesite lozinku: ");
+                        scanf("%s",pin_kod);
+                        brojac++;
+                    }
+                    while(strcmp(pin_kod,n.PIN)!=0 && brojac<5);
                     if(strcmp(pin_kod,n.PIN)==0)
                     {
-                        flag1=1;
                         n.brojPrijava++;
+                        flag1=1;
+                    }
+                    else if(brojac==5)
+                    {
+                        printf("ERROR! Unijeli ste pogresnu lozinku 5 puta!\n");
                     }
                 }
             }
@@ -253,7 +281,7 @@ int provjeri_kor_ime(char kor_ime[])
     int flag=0;
     if((fp=fopen("korisnickiNalozi.txt","r"))!=NULL)
     {
-        while((fscanf(fp,"%s %s %s %d\n",pom1,username,pom2,&d))!=EOF)
+        while((fscanf(fp,"%s %s %s %d %*d\n",pom1,username,pom2,&d))!=EOF)
         {
             if(strcasecmp(username,kor_ime)==0)
                 flag=1;
@@ -264,16 +292,19 @@ int provjeri_kor_ime(char kor_ime[])
         printf("ERROR! Ne postoji datoteka sa korisnickim nalozima.\n");
     if(flag==1)
         return 1;
-    else return 0;
+    else
+        return 0;
 }
 
 void dodavanje_novog_zaposlenog(int m, char licenca[])
 {
+    printf("Trenutan broj radnika je %d.\n",m);
     FILE *fp1,*fp2;
     char c[MAX];
     char ime[MAX],JMB[MAX],lozinka[MAX];
     int PIN;
     NOVI_NALOG k;
+    int br=0;
     int broj_bl=m;
     int flag=0;
     if((fp1=fopen("podaci.txt","a"))!=NULL)
@@ -325,8 +356,15 @@ void dodavanje_novog_zaposlenog(int m, char licenca[])
         }
         while(flag1==1);
         char lozinka[MAX];
-        printf("Unesite lozinku korisnika: ");
-        scanf("%s",lozinka);
+        while(1)
+        {
+            printf("Unesite lozinku:");
+            scanf("%s",lozinka);
+            if((strlen(lozinka))>5)
+                break;
+            else
+                printf("Lozinka mora imati minimalno 6 znakova!\n");
+        }
         int PIN;
         int flag;
         srand(NULL);
@@ -339,7 +377,7 @@ void dodavanje_novog_zaposlenog(int m, char licenca[])
 
         if((fp2=fopen("korisnickiNalozi.txt","a"))!=NULL)
         {
-            fprintf(fp2,"%s %s %s %d\n",r.JMB,username,lozinka,PIN);
+            fprintf(fp2,"%s %s %s %d %d\n",r.JMB,username,lozinka,PIN,br);
             fclose(fp2);
         }
 
@@ -370,9 +408,10 @@ int trazi_pin(int pin)
     char s1[MAX], s2[MAX],s3[MAX];
     int d;
     int flag=0;
+    int m;
     if((fp=fopen("korisnickiNalozi.txt","r"))!=NULL)
     {
-        while(fscanf(fp,"%s %s %s %d", s1, s2,s3,&d)!=EOF)
+        while(fscanf(fp,"%s %s %s %d %d", s1, s2,s3,&d,&m)!=EOF)
         {
             if(d==pin)
                 flag=1;
@@ -397,6 +436,7 @@ void pregled_prijave_radnogvr(CVOR** pglava)
     scanf("%s",ime);
     printf("Prezime: ");
     scanf("%s",prezime);
+    int flag=0;
     int indikator_pretrage=0;
     if(*pglava==0)
         return;
@@ -414,6 +454,7 @@ void pregled_prijave_radnogvr(CVOR** pglava)
                 strcat(datName,".txt");
                 if((fp=fopen(datName,"r")))
                 {
+                    flag=1;
                     printf("\n\nPregled radnog vremena radnika:");
                     printf("\n----------------------------------------------\n");
                     while(fgets(tekst,sizeof(tekst),fp))
@@ -421,14 +462,13 @@ void pregled_prijave_radnogvr(CVOR** pglava)
                     printf("\n----------------------------------------------\n\n");
                     fclose(fp);
                 }
-                else
-                    printf("ERROR! Ne postoji registar radnika. Unos radnog vremena se vrsi u aplikaciji za evidentiranje radnog vremena.\n");
-
             }
             trenutni=trenutni->next;
         }
         if(indikator_pretrage!=1)
             printf("Neuspjesna pretraga!\n");
+        else if(flag==0)
+            printf("ERROR! Regstar radnika ne postoji. Unos radnog vremena zaposlenog se vrsi u aplikaciji za evidentiranje vremena!\n");
         printf("===================================\n");
     }
     return;
@@ -596,7 +636,7 @@ void upotreba_HR_aplikacije(char licenca[])
     do
     {
         printf("===================================\n");
-        printf("Izaberite opciju 1,2,3,4,5,6 ili 7:\n");
+        printf("Izaberite opciju 1,2,3,4,5,6,7 ili 0 za prekid:\n");
         printf("1. Dodavanje novog zaposlenog.\n");
         printf("2. Pregled prijave radnog vremena radnika.\n");
         printf("3. Aktivacija/deaktivacija zaposlenog.\n");
@@ -604,6 +644,7 @@ void upotreba_HR_aplikacije(char licenca[])
         printf("5. Pregled svih radnika po radnom mjestu.\n");
         printf("6. Pretraga radnika po imenu ili prezimenu.\n");
         printf("7. Informacije.\n");
+        printf("0. Nazad [kraj].\n");
         printf("===================================\n");
         printf("Vas izbor: ");
         scanf("%d",&i);
@@ -621,12 +662,14 @@ void upotreba_HR_aplikacije(char licenca[])
             pretraga_po_imenu_prezimenu(&glava);
         else if(i==7)
             InformacijeOFirmi();
+        else if(i==0)
+            printf("Zavrsena upotreba HR aplikacije.\n");
         else
             printf("NEPOZNATA OPCIJA.\n");
-        printf("Ukoliko zelite da prekinete upotrebu HRaplikacije unesite KRAJ, u suprotnom unesite bilo koje slovo sa tastature! ");
-        scanf("%s",kraj);
+        //printf("Ukoliko zelite da prekinete upotrebu HRaplikacije unesite KRAJ, u suprotnom unesite bilo koje slovo sa tastature! ");
+       //scanf("%s",kraj);
     }
-    while(strcasecmp(kraj,"KRAJ")!=0);
+    while(i!=0);
 }
 
 int provjera_licence()
@@ -651,7 +694,7 @@ int main()
 {
     FILE* firma;
     char imefirme[MAX1], pom[MAX1];
-
+    int brojac=0;
     if((firma=fopen("Config.txt","r"))!=NULL)
     {
         fgets(pom,100,firma);
@@ -680,16 +723,22 @@ int main()
             indikator=pristup_HR_aplikaciji();
             if(indikator==-1)
             {
+                brojac++;
+                printf("----------------------------------------------------\n");
                 printf("~~~Pristup HR aplikaciji odbijen! Pokusajte ponovo!\nUkoliko zelite da odustanete ukucajte KRAJ, inace unesite bilo koje slovo sa tastature.~~~\n");
+                printf("----------------------------------------------------\n");
                 scanf("%s",kraj);
             }
         }
-        while((strcasecmp(kraj,"KRAJ"))!=0 && indikator==-1);
+        while((strcasecmp(kraj,"KRAJ"))!=0 && indikator==-1 &&  brojac<5);
+        if(brojac==5)
+            printf("ERROR! Unijeli ste pogresne informacije 5 puta, da biste nastavili pokrenite program ponovo!\n");
         if(indikator!=-1)
             upotreba_HR_aplikacije("sa licencom");
     }
     else
     {
+        brojac=0;
         indikator=0;
         if(provera_licence==-1)
             printf("Neispravan alfanumericki kljuc!\nPokrenite program ponovo!\n");
@@ -701,15 +750,19 @@ int main()
                 indikator=pristup_HR_aplikaciji();
                 if(indikator==-1)
                 {
+                    brojac++;
+                    printf("----------------------------------------------------\n");
                     printf("~~~Pristup HR aplikaciji odbijen! Pokusajte ponovo!\nUkoliko zelite da odustanete ukucajte KRAJ, inace unesite bilo koje slovo sa tastature.~~~\n");
+                    printf("----------------------------------------------------\n");
                     scanf("%s",kraj);
                 }
             }
-            while((strcasecmp(kraj,"KRAJ"))!=0 && indikator==-1);
+            while((strcasecmp(kraj,"KRAJ"))!=0 && indikator==-1 && brojac<5);
+            if(brojac==5)
+                printf("ERROR! Unijeli ste pogresne informacije 5 puta, da biste nastavili pokrenite program ponovo!\n");
             if(indikator!=-1)
                 upotreba_HR_aplikacije("bez licence");
         }
     }
     return 0;
 }
-
