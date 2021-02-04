@@ -475,11 +475,11 @@ void pregled_prijave_radnogvr(CVOR** pglava)
     }
     return;
 }
-void aktivacija_deaktivacija()
+void aktivacija_deaktivacija(CVOR** glava)
 {
     char ime[MAX],prezime[MAX],JMB[MAX];
     FILE* fp;
-    CVOR* glava=NULL;
+    //CVOR* glava=NULL;
     DATUM dat;
     printf("Unesite ime i prezime radnika.\n");
     printf("Ime: ");
@@ -488,8 +488,8 @@ void aktivacija_deaktivacija()
     scanf("%s",prezime);
     printf("Unesite maticni broj radnika: ");
     scanf("%s",JMB);
-    if(ucitavanje_iz_datoteke(&glava))
-    {
+   // if(ucitavanje_iz_datoteke(&glava))
+    //{
         int indikator_pretrage=0;
         if(glava==0)
             return;
@@ -545,7 +545,7 @@ void aktivacija_deaktivacija()
             else
                 printf("ERROR! Nemoguce otvoriti datoteku sa podacima.\n");
             return;
-        }
+       // }
     }
 }
 void pregled_po_sektoru(CVOR** pglava)
@@ -655,7 +655,7 @@ void upotreba_HR_aplikacije(char licenca[])
         else if(i==2)
             pregled_prijave_radnogvr(&glava);
         else if(i==3)
-            aktivacija_deaktivacija();
+            aktivacija_deaktivacija(&glava);
         else if(i==4)
             pregled_po_sektoru(&glava);
         else if(i==5)
