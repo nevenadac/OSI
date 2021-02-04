@@ -611,7 +611,7 @@ void pregled_po_rmjestu(CVOR** pglava)
                 printf("~~~~~~~~~~~~~~~~~~~~\n");
                 printf("Ime: %s\n",tr->info.ime);
                 printf("Prezime: %s\n",tr->info.prezime);
-                printf("Radno mjesto: %s\n", tr->info.rmj);
+                printf("Radni sektor: %s\n", tr->info.rsektr);
                 printf("Datum zaposlenja: %d.%d.%d.\n",tr->info.dpu.dan,tr->info.dpu.mjesec, tr->info.dpu.godina);
                 printf("Datum potpisivanja ugovora: %d.%d.%d.\n",tr->info.dpu.dan,tr->info.dpu.mjesec,tr->info.dpu.godina);
                 printf("Mjesto stalnog boravka: %s\n",tr->info.mjbor);
@@ -669,8 +669,6 @@ void upotreba_HR_aplikacije(char licenca[])
             printf("Zavrsena upotreba HR aplikacije.\n");
         else
             printf("NEPOZNATA OPCIJA.\n");
-        //printf("Ukoliko zelite da prekinete upotrebu HRaplikacije unesite KRAJ, u suprotnom unesite bilo koje slovo sa tastature! ");
-       //scanf("%s",kraj);
     }
     while(i!=0);
 }
