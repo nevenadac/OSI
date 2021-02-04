@@ -495,7 +495,7 @@ void aktivacija_deaktivacija(CVOR** glava)
             return;
         else
         {
-            CVOR* trenutni=glava;
+            CVOR* trenutni= *glava;
             while(trenutni!=NULL)
             {
                 if(strcmpi(trenutni->info.ime,ime)==0 && strcmpi(trenutni->info.prezime, prezime)==0 && strcmpi(trenutni->info.JMB, JMB)==0 )
@@ -532,7 +532,7 @@ void aktivacija_deaktivacija(CVOR** glava)
                     return;
                 else
                 {
-                    CVOR* trenutni=glava;
+                    CVOR* trenutni=*glava;
                     while(trenutni!=NULL)
                     {
                         ZAPOSLENI r=trenutni->info;
