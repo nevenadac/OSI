@@ -642,7 +642,7 @@ void upotreba_HR_aplikacije(char licenca[])
         printf("Izaberite opciju 1,2,3,4,5,6,7 ili 0 za prekid:\n");
         printf("1. Dodavanje novog zaposlenog.\n");
         printf("2. Pregled prijave radnog vremena radnika.\n");
-        printf("3. Aktivacija/deaktivacija zaposlenog.\n");
+        printf("3. Deaktivacija zaposlenog.\n");
         printf("4. Pregled svih radnika po sektoru.\n");
         printf("5. Pregled svih radnika po radnom mjestu.\n");
         printf("6. Pretraga radnika po imenu ili prezimenu.\n");
