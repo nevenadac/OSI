@@ -341,7 +341,6 @@ void dodavanje_novog_zaposlenog(int m, char licenca[],CVOR** pglava)
         r.status.prekidzpsl.dan=0;
         r.status.prekidzpsl.mjesec=0;
         r.status.prekidzpsl.godina=00;
-        dodaj_u_listu(pglava,r);
         printf("Kreiranje korisnickog naloga->\n");
         printf("Unesite korisnicko ime: ");
         char username[MAX];
@@ -376,6 +375,8 @@ void dodavanje_novog_zaposlenog(int m, char licenca[],CVOR** pglava)
             flag=trazi_pin(PIN);
         }
         while(flag==1);
+        r.PIN=PIN;
+        dodaj_u_listu(pglava,r);
 
         if((fp2=fopen("korisnickiNalozi.txt","a"))!=NULL)
         {
