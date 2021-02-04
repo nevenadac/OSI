@@ -127,6 +127,7 @@ void pretraga_po_imenu_prezimenu(CVOR** pglava)
     printf("Unesite ime i prezime za pretragu: ");
     scanf("%s",ime);
     scanf("%s",prezime);
+    ZAPOSLENI z;
     int indikator_pretrage=0;
     if(*pglava==0)
         return;
@@ -296,7 +297,7 @@ int provjeri_kor_ime(char kor_ime[])
         return 0;
 }
 
-void dodavanje_novog_zaposlenog(int m, char licenca[])
+void dodavanje_novog_zaposlenog(int m, char licenca[],CVOR** pglava)
 {
     printf("Trenutan broj radnika je %d.\n",m);
     FILE *fp1,*fp2;
@@ -340,6 +341,7 @@ void dodavanje_novog_zaposlenog(int m, char licenca[])
         r.status.prekidzpsl.dan=0;
         r.status.prekidzpsl.mjesec=0;
         r.status.prekidzpsl.godina=00;
+        dodaj_u_listu(pglava,r);
         printf("Kreiranje korisnickog naloga->\n");
         printf("Unesite korisnicko ime: ");
         char username[MAX];
@@ -649,7 +651,7 @@ void upotreba_HR_aplikacije(char licenca[])
         printf("Vas izbor: ");
         scanf("%d",&i);
         if(i==1)
-            dodavanje_novog_zaposlenog(m,licenca);
+            dodavanje_novog_zaposlenog(m,licenca,&glava);
         else if(i==2)
             pregled_prijave_radnogvr(&glava);
         else if(i==3)
