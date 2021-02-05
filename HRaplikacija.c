@@ -127,6 +127,7 @@ void pretraga_po_imenu_prezimenu(CVOR** pglava)
     printf("Unesite ime i prezime za pretragu: ");
     scanf("%s",ime);
     scanf("%s",prezime);
+    ZAPOSLENI z;
     int indikator_pretrage=0;
     if(*pglava==0)
         return;
@@ -296,7 +297,7 @@ int provjeri_kor_ime(char kor_ime[])
         return 0;
 }
 
-void dodavanje_novog_zaposlenog(int m, char licenca[])
+void dodavanje_novog_zaposlenog(int m, char licenca[],CVOR** pglava)
 {
     printf("Trenutan broj radnika je %d.\n",m);
     FILE *fp1,*fp2;
@@ -374,6 +375,8 @@ void dodavanje_novog_zaposlenog(int m, char licenca[])
             flag=trazi_pin(PIN);
         }
         while(flag==1);
+        r.PIN=PIN;
+        dodaj_u_listu(pglava,r);
 
         if((fp2=fopen("korisnickiNalozi.txt","a"))!=NULL)
         {
@@ -473,11 +476,11 @@ void pregled_prijave_radnogvr(CVOR** pglava)
     }
     return;
 }
-void aktivacija_deaktivacija()
+void aktivacija_deaktivacija(CVOR** glava)
 {
     char ime[MAX],prezime[MAX],JMB[MAX];
     FILE* fp;
-    CVOR* glava=NULL;
+    //CVOR* glava=NULL;
     DATUM dat;
     printf("Unesite ime i prezime radnika.\n");
     printf("Ime: ");
@@ -486,14 +489,14 @@ void aktivacija_deaktivacija()
     scanf("%s",prezime);
     printf("Unesite maticni broj radnika: ");
     scanf("%s",JMB);
-    if(ucitavanje_iz_datoteke(&glava))
-    {
+   // if(ucitavanje_iz_datoteke(&glava))
+    //{
         int indikator_pretrage=0;
         if(glava==0)
             return;
         else
         {
-            CVOR* trenutni=glava;
+            CVOR* trenutni= *glava;
             while(trenutni!=NULL)
             {
                 if(strcmpi(trenutni->info.ime,ime)==0 && strcmpi(trenutni->info.prezime, prezime)==0 && strcmpi(trenutni->info.JMB, JMB)==0 )
@@ -530,7 +533,7 @@ void aktivacija_deaktivacija()
                     return;
                 else
                 {
-                    CVOR* trenutni=glava;
+                    CVOR* trenutni=*glava;
                     while(trenutni!=NULL)
                     {
                         ZAPOSLENI r=trenutni->info;
@@ -543,7 +546,7 @@ void aktivacija_deaktivacija()
             else
                 printf("ERROR! Nemoguce otvoriti datoteku sa podacima.\n");
             return;
-        }
+       // }
     }
 }
 void pregled_po_sektoru(CVOR** pglava)
@@ -608,7 +611,7 @@ void pregled_po_rmjestu(CVOR** pglava)
                 printf("~~~~~~~~~~~~~~~~~~~~\n");
                 printf("Ime: %s\n",tr->info.ime);
                 printf("Prezime: %s\n",tr->info.prezime);
-                printf("Radno mjesto: %s\n", tr->info.rmj);
+                printf("Radni sektor: %s\n", tr->info.rsektr);
                 printf("Datum zaposlenja: %d.%d.%d.\n",tr->info.dpu.dan,tr->info.dpu.mjesec, tr->info.dpu.godina);
                 printf("Datum potpisivanja ugovora: %d.%d.%d.\n",tr->info.dpu.dan,tr->info.dpu.mjesec,tr->info.dpu.godina);
                 printf("Mjesto stalnog boravka: %s\n",tr->info.mjbor);
@@ -639,7 +642,7 @@ void upotreba_HR_aplikacije(char licenca[])
         printf("Izaberite opciju 1,2,3,4,5,6,7 ili 0 za prekid:\n");
         printf("1. Dodavanje novog zaposlenog.\n");
         printf("2. Pregled prijave radnog vremena radnika.\n");
-        printf("3. Aktivacija/deaktivacija zaposlenog.\n");
+        printf("3. Deaktivacija zaposlenog.\n");
         printf("4. Pregled svih radnika po sektoru.\n");
         printf("5. Pregled svih radnika po radnom mjestu.\n");
         printf("6. Pretraga radnika po imenu ili prezimenu.\n");
@@ -649,11 +652,11 @@ void upotreba_HR_aplikacije(char licenca[])
         printf("Vas izbor: ");
         scanf("%d",&i);
         if(i==1)
-            dodavanje_novog_zaposlenog(m,licenca);
+            dodavanje_novog_zaposlenog(m,licenca,&glava);
         else if(i==2)
             pregled_prijave_radnogvr(&glava);
         else if(i==3)
-            aktivacija_deaktivacija();
+            aktivacija_deaktivacija(&glava);
         else if(i==4)
             pregled_po_sektoru(&glava);
         else if(i==5)
@@ -666,8 +669,6 @@ void upotreba_HR_aplikacije(char licenca[])
             printf("Zavrsena upotreba HR aplikacije.\n");
         else
             printf("NEPOZNATA OPCIJA.\n");
-        //printf("Ukoliko zelite da prekinete upotrebu HRaplikacije unesite KRAJ, u suprotnom unesite bilo koje slovo sa tastature! ");
-       //scanf("%s",kraj);
     }
     while(i!=0);
 }
