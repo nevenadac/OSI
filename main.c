@@ -79,7 +79,7 @@ int main()
         scanf("%d",&pin);
         if((file=fopen("korisnickiNalozi.txt","r")))
         {
-            while((fscanf(file,"%*d %*s %*s %d",&pinDat))!=EOF)
+            while((fscanf(file,"%*s %*s %*s %d %*d",&pinDat))!=EOF)
             {
                 if(pin==pinDat)
                 {
